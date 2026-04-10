@@ -1,0 +1,5 @@
+รันคำสั่งนี้ใน PowerShell:
+
+Stop-Process -Name "syncthing" -ErrorAction SilentlyContinue; Remove-Item "$([Environment]::GetFolderPath('Startup'))\Syncthing.lnk" -ErrorAction SilentlyContinue; Remove-Item "$env:LOCALAPPDATA\Syncthing" -Recurse -Force -ErrorAction SilentlyContinue; Write-Host "Done."
+
+รันแล้วเห็น "Done." = ลบเรียบร้อย

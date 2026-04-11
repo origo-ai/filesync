@@ -98,7 +98,7 @@ try {
     Invoke-RestMethod "http://127.0.0.1:8384/rest/config/devices" `
         -Method POST -Headers $headers `
         -ContentType "application/json" -Body $deviceBody | Out-Null
-    Write-Host "  Added: Kay Laptop"
+    Write-Host "  Added: Mac Mini"
 } catch {
     Write-Host "  Already exists or error: $($_.Exception.Message)"
 }

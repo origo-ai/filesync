@@ -66,7 +66,7 @@ if (-not (Test-Path $syncthingExe)) {
 
 # ── Step 3: Start Syncthing (ครั้งแรก สร้าง config) ─────────
 Write-Host "[3/6] Starting Syncthing..."
-Start-Process -FilePath $syncthingExe -WindowStyle Hidden
+Start-Process -FilePath $syncthingExe -ArgumentList "--no-browser" -WindowStyle Hidden
 Start-Sleep -Seconds 3
 
 $script:apiKey = Get-SyncthingApiKey
@@ -133,12 +133,13 @@ Start-Sleep -Seconds 1
 
 $s = (New-Object -COM WScript.Shell).CreateShortcut("$startupFolder\Syncthing.lnk")
 $s.TargetPath = $syncthingExe
+$s.Arguments = "--no-browser"
 $s.WindowStyle = 7
 $s.Save()
 Write-Host "  Syncthing will auto-start on login"
 
 # Start Syncthing again (hidden)
-Start-Process -FilePath $syncthingExe -WindowStyle Hidden
+Start-Process -FilePath $syncthingExe -ArgumentList "--no-browser" -WindowStyle Hidden
 
 # ── Done ─────────────────────────────────────────────────────
 Write-Host ""

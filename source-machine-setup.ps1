@@ -6,11 +6,14 @@
 #   .\source-machine-setup.ps1
 #   .\source-machine-setup.ps1 -PersonName "สมชาย"
 #   .\source-machine-setup.ps1 -PersonName "สมชาย" -SyncFolder "C:\Users\User\Documents\Reports"
+#   .\source-machine-setup.ps1 -PersonName "ClientA" -DepartmentName "Finance" -SyncFolder "C:\Finance"
+#   .\source-machine-setup.ps1 -PersonName "ClientA" -DepartmentName "Marketing" -SyncFolder "C:\Marketing"
 # ============================================================
 
 param(
-    [string]$PersonName = "User",
-    [string]$SyncFolder = "C:\sync-out"
+    [string]$PersonName      = "User",
+    [string]$SyncFolder      = "C:\sync-out",
+    [string]$DepartmentName  = ""
 )
 
 $kayDeviceId  = "TIC5RDP-LZZ7SJL-4ZILCW3-22Z3BVV-C5WOPBH-DXJ73IM-RRFZE6W-CZZQGQB"  # Mac Mini (updated 2026-04-10)
@@ -92,7 +95,10 @@ $deviceBody = @{
     autoAcceptFolders = $false
 } | ConvertTo-Json
 
-Write-Host "  Person: $PersonName"
+Write-Host "  Client: $PersonName"
+if ($DepartmentName -ne "") {
+    Write-Host "  Department: $DepartmentName"
+}
 
 try {
     Invoke-RestMethod "http://127.0.0.1:8384/rest/config/devices" `
@@ -105,11 +111,20 @@ try {
 
 # ── Step 5: Share โฟลเดอร์ไปหา Kay ──────────────────────────
 Write-Host "[5/6] Sharing folder with Kay..."
-$safeName   = $PersonName -replace '[^a-zA-Z0-9]', '-'
-$folderId   = "origo-sync-$safeName".ToLower()
+$safeClient = $PersonName -replace '[^a-zA-Z0-9]', '-'
+
+if ($DepartmentName -ne "") {
+    $safeDept  = $DepartmentName -replace '[^a-zA-Z0-9]', '-'
+    $folderId  = "origo-sync-$safeClient-$safeDept".ToLower()
+    $folderLabel = "Origo Sync - $PersonName ($DepartmentName)"
+} else {
+    $folderId    = "origo-sync-$safeClient".ToLower()
+    $folderLabel = "Origo Sync - $PersonName"
+}
+
 $folderBody = @{
     id      = $folderId
-    label   = "Origo Sync - $PersonName"
+    label   = $folderLabel
     path    = $syncFolder
     type    = "sendonly"
     devices = @(
@@ -121,7 +136,7 @@ try {
     Invoke-RestMethod "http://127.0.0.1:8384/rest/config/folders" `
         -Method POST -Headers $headers `
         -ContentType "application/json" -Body $folderBody | Out-Null
-    Write-Host "  Shared: $syncFolder → Kay Laptop"
+    Write-Host "  Shared: $syncFolder → Mac Mini"
 } catch {
     Write-Host "  Already exists or error: $($_.Exception.Message)"
 }
@@ -145,7 +160,13 @@ Start-Process -FilePath $syncthingExe -ArgumentList "--no-browser" -WindowStyle 
 Write-Host ""
 Write-Host "============================================"
 Write-Host " Setup complete!"
+Write-Host " Client      : $PersonName"
+if ($DepartmentName -ne "") {
+    Write-Host " Department  : $DepartmentName"
+    Write-Host " Mac Mini path: incoming/$PersonName/Data Raw/$DepartmentName/"
+}
 Write-Host " Sync folder : $syncFolder"
+Write-Host " Folder ID   : $folderId"
 Write-Host " Drop files in that folder to send to Kay."
 Write-Host " Waiting for Kay to accept the connection."
 Write-Host "============================================"

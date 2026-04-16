@@ -163,7 +163,7 @@ Write-Host " Setup complete!"
 Write-Host " Client      : $PersonName"
 if ($DepartmentName -ne "") {
     Write-Host " Department  : $DepartmentName"
-    Write-Host " Mac Mini path: incoming/$PersonName/Data Raw/$DepartmentName/"
+    Write-Host " Mac Mini path: incoming/$PersonName/$DepartmentName/"
 }
 Write-Host " Sync folder : $syncFolder"
 Write-Host " Folder ID   : $folderId"
